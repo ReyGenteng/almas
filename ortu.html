@@ -1,65 +1,51 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Almas - Jemput Anak</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #fff3e0; padding: 50px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        input, button { padding: 10px; margin: 10px 0; width: 90%; border-radius: 5px; border: 1px solid #ccc; }
-        button { background-color: #ff9800; color: white; cursor: pointer; border: none; font-weight: bold; }
-        button:hover { background-color: #e68a00; }
+        body { font-family: sans-serif; text-align: center; background-color: #fff3e0; padding-top: 50px; }
+        .card { background: white; padding: 30px; display: inline-block; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input { padding: 10px; width: 250px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #ff9800; color: white; border: none; border-radius: 5px; cursor: pointer; }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 </head>
 <body>
-
     <div class="card">
-        <h2>Aplikasi Jemput Anak 🚕</h2>
-        <input type="text" id="namaAnak" placeholder="Masukkan Nama Anak Kamu" required>
-        <button id="btnJemput">Jemput Anak Sekarang</button>
-        <p>Belum terdaftar? <a href="daftar.html">Daftar di sini</a></p>
+        <h2>🚗 Jemput Anak</h2>
+        <input type="text" id="namaInput" placeholder="Ketik Nama Anak..."><br>
+        <button onclick="prosesJemput()">Klik Untuk Jemput ✅</button>
+        <p><a href="daftar.html">Belum daftar? Klik di sini</a></p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDQB33Au3Oq5-81MMJnCZ5NZXzLrySeyOg",
             authDomain: "almas-75e72.firebaseapp.com",
+            databaseURL: "https://almas-75e72-default-rtdb.firebaseio.com",
             projectId: "almas-75e72",
             storageBucket: "almas-75e72.firebasestorage.app",
             messagingSenderId: "726212467820",
             appId: "1:726212467820:web:fd4354f8595bf587eb0c49"
         };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        document.getElementById('btnJemput').addEventListener('click', async () => {
-            const anak = document.getElementById('namaAnak').value;
-
-            if(anak === "") {
-                alert("Masukkan nama anak dulu ya! 🛑");
-                return;
-            }
-
-            const q = query(collection(db, "siswa"), where("nama_anak", "==", anak));
-            const querySnapshot = await getDocs(q);
-
-            if (querySnapshot.empty) {
-                alert("Nama anak tidak ditemukan. Silakan daftar dulu! 🔍");
-            } else {
-                querySnapshot.forEach(async (document) => {
-                    const docRef = doc(db, "siswa", document.id);
-                    await updateDoc(docRef, {
-                        status: "Dijemput"
-                    });
-                    alert(`Status ${anak} berhasil diubah menjadi Dijemput! ✅`);
+        function prosesJemput() {
+            const nama = document.getElementById('namaInput').value;
+            db.ref('siswa').once('value', (snapshot) => {
+                let ditemukan = false;
+                snapshot.forEach((child) => {
+                    if(child.val().namaAnak.toLowerCase() === nama.toLowerCase()) {
+                        db.ref('siswa/' + child.key).update({ status: "Dijemput" });
+                        alert("Status berhasil diupdate! 🤝");
+                        ditemukan = true;
+                    }
                 });
-            }
-        });
+                if(!ditemukan) alert("Nama anak tidak ditemukan! ❌");
+            });
+        }
     </script>
 </body>
 </html>
