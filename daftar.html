@@ -1,65 +1,54 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Almas - Daftar Anak</title>
+    <title>Almas - Pendaftaran</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f8ff; padding: 50px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        input, button { padding: 10px; margin: 10px 0; width: 90%; border-radius: 5px; border: 1px solid #ccc; }
-        button { background-color: #4CAF50; color: white; cursor: pointer; border: none; font-weight: bold; }
-        button:hover { background-color: #45a049; }
+        body { font-family: sans-serif; text-align: center; background-color: #e3f2fd; padding-top: 50px; }
+        .card { background: white; padding: 30px; display: inline-block; border-radius: 15px; }
+        input { padding: 10px; width: 250px; margin: 5px; border-radius: 5px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px; }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 </head>
 <body>
-
     <div class="card">
-        <h2>Pendaftaran Jemputan Almas 🏫</h2>
-        <input type="text" id="namaAnak" placeholder="Masukkan Nama Anak" required>
-        <input type="text" id="namaOrtu" placeholder="Masukkan Nama Orang Tua" required>
-        <button id="btnDaftar">Daftarkan Anak</button>
-        <p><a href="ortu.html">Sudah daftar? Ke halaman penjemputan</a></p>
+        <h2>📝 Daftarkan Anak</h2>
+        <input type="text" id="namaAnak" placeholder="Nama Lengkap Anak"><br>
+        <input type="text" id="namaOrtu" placeholder="Nama Orang Tua"><br>
+        <button onclick="simpanData()">Simpan Data 💾</button>
+        <p><a href="ortu.html">Kembali ke Penjemputan</a></p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDQB33Au3Oq5-81MMJnCZ5NZXzLrySeyOg",
             authDomain: "almas-75e72.firebaseapp.com",
+            databaseURL: "https://almas-75e72-default-rtdb.firebaseio.com",
             projectId: "almas-75e72",
             storageBucket: "almas-75e72.firebasestorage.app",
             messagingSenderId: "726212467820",
             appId: "1:726212467820:web:fd4354f8595bf587eb0c49"
         };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        document.getElementById('btnDaftar').addEventListener('click', async () => {
-            const anak = document.getElementById('namaAnak').value;
-            const ortu = document.getElementById('namaOrtu').value;
-
-            if(anak === "" || ortu === "") {
-                alert("Nama tidak boleh kosong! 🛑");
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "siswa"), {
-                    nama_anak: anak,
-                    nama_ortu: ortu,
+        function simpanData() {
+            const namaA = document.getElementById('namaAnak').value;
+            const namaO = document.getElementById('namaOrtu').value;
+            if(namaA && namaO) {
+                db.ref('siswa').push({
+                    namaAnak: namaA,
+                    namaOrtu: namaO,
                     status: "Belum dijemput"
                 });
-                alert("Berhasil didaftarkan! 🎉");
-                window.location.href = "ortu.html"; // Pindah ke halaman jemput
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                alert("Gagal mendaftar. Pastikan Firestore sudah aktif! 😥");
+                alert("Berhasil mendaftar! 🎉");
+                document.getElementById('namaAnak').value = "";
+                document.getElementById('namaOrtu').value = "";
+            } else {
+                alert("Isi semua data ya! ⚠️");
             }
-        });
+        }
     </script>
 </body>
 </html>
